@@ -84,6 +84,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from 'url'; // Import fileURLToPath from 'url'
+import mongoose from "mongoose";
 
 // Resolve __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -121,4 +122,12 @@ app.use("/api/*", (req, res) => {
     res.status(404).json({ message: "API route not found" });
 });
 
+app.get("/test-db", async (req, res) => {
+    try {
+        const isConnected = mongoose.connection.readyState === 1;
+        res.json({ message: isConnected ? "Connected to MongoDB" : "Not connected" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 export { app };
