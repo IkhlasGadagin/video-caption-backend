@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema(
             unique: true,
             lowercase: true,
             trim: true,
-
         },
         fullName: {
             type: String,
@@ -32,18 +31,18 @@ const userSchema = new mongoose.Schema(
         coverImage: {
             type: String,  //cloudinary url is stored multer middleware public and create but optional
         },
-
-        // watchHistory: [{
-        //     type: Schema.Types.ObjectId,
-        //     ref: "Video"
-        // }],
-
         password: {
             type: String,
             required: [true, 'Password is required'],
         },
         refreshToken: {
             type: String,
+        },
+        authProvider: {
+            type: String, // e.g., "google", "facebook", etc.
+        },
+        authProviderId: {
+            type: String, // ID from the auth provider
         }
     },
     {

@@ -31,6 +31,53 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     }
 }
 
+const loginAuth0 = asyscHandler(async (req, res) => {
+    const { email, email_verified, given_name, name, nickname, picture, sub } = req.body;
+    console.log(req.body, "req.body");
+    // Validate required fields
+    if (!email || !email_verified || !sub) {
+        throw new ApiError(400, "Email, Email Verified, and Sub are required");
+    }
+
+    // Check if user already exists
+    let user = await User.findOne({ email });
+    console.log(user, "user1 is present in db email found");
+
+    if (!user) {
+        // If user doesn't exist, create a new user
+        user = await User.create({
+            fullName: name || given_name || nickname,
+            username: nickname.toLowerCase(),
+            email,
+            avatar: picture,
+            password: "defaultPassword123", // Default password or optional placeholder
+            authProvider: "google",
+            authProviderId: sub,
+        });
+    }
+
+    // Generate access and refresh tokens
+    const { generatedaccessToken, generatedrefreshToken } = await generateAccessTokenAndRefreshToken(user._id);
+    const loggeduserData = await User.findById(user._id).select("-password -refreshToken");
+    // Set cookie options
+    const options = {
+        httpOnly: true,
+        secure: true, // Ensure cookies are marked as secure
+        sameSite: "Strict", // Additional security
+    };
+
+    return res
+        .status(200)
+        .cookie("accessToken", generatedaccessToken, options)
+        .cookie("refreshToken", generatedrefreshToken, options)
+        .json(new ApiResponse(200,
+            {
+                user: loggeduserData, generatedaccessToken, generatedrefreshToken
+            },
+            "User Logged in Successfully"))
+        ;
+});
+
 const registerUser = asyscHandler(async (req, res) => {
     /* 
           1️⃣ Receive the frontend data
@@ -506,5 +553,5 @@ export {
     refreshAccessToken, changeCurrentPassword,
     getCurrentUser, updateUserProfile, updateUserAvatar,
     updateUserCoverImage, getuserChannelProfile,
-    getWatchHistory
+    getWatchHistory, loginAuth0
 };
