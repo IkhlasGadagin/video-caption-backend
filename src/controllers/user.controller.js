@@ -215,6 +215,8 @@ const loginUser = asyscHandler(async (req, res) => {
 const loggedOut = asyscHandler(async (req, res) => {
     // the user is came from the mideleware verifyJWT via db
     // User.findByIdAndUpdate(req.user._id, { refreshToken: "" });
+    console.log(req.user._id, "req.user._id");
+
     await User.findByIdAndUpdate(req.user._id, {
         $unset: {
             refreshToken: 1 // this removes the field from document better that undefined or null
